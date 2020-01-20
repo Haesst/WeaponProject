@@ -3,7 +3,6 @@
 #include "WeaponProjectProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
-#include "DummyDamageInterface.h"
 #include "Engine.h"
 #include "EngineGlobals.h"
 
@@ -37,15 +36,9 @@ AWeaponProjectProjectile::AWeaponProjectProjectile()
 void AWeaponProjectProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics
-	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL))
+	if (CheckForCollisionPhysics(OtherActor, OtherComp))
 	{
-		IDummyDamageInterface* TestDummyHit = Cast<IDummyDamageInterface>(OtherActor);
-
-		if (TestDummyHit)
-		{
-			FString boneName = Hit.BoneName.ToString();
-			TestDummyHit->Execute_DummyHit(OtherActor, Damage, *boneName);
-		}
+		ApplyTestDummyDamage(OtherActor, Hit);
 
 		if (OtherComp->IsSimulatingPhysics())
 		{
@@ -65,4 +58,20 @@ void AWeaponProjectProjectile::OnConstruction(const FTransform& Transform)
 {
 	ProjectileMovement->InitialSpeed = InitialSpeed;
 	ProjectileMovement->MaxSpeed = InitialSpeed + 0.f;
+}
+
+bool AWeaponProjectProjectile::CheckForCollisionPhysics(AActor* OtherActor, UPrimitiveComponent* OtherComp)
+{
+	return (OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr);
+}
+
+void AWeaponProjectProjectile::ApplyTestDummyDamage(AActor* OtherActor, const FHitResult& Hit)
+{
+	IDummyDamageInterface* TestDummyHit = Cast<IDummyDamageInterface>(OtherActor);
+
+	if (TestDummyHit)
+	{
+		FString boneName = Hit.BoneName.ToString();
+		TestDummyHit->Execute_DummyHit(OtherActor, Damage, *boneName);
+	}
 }
