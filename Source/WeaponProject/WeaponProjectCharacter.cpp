@@ -54,13 +54,17 @@ void AWeaponProjectCharacter::BeginPlay()
 
 	int index = 0;
 
+	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
+}
+
+void AWeaponProjectCharacter::CreateWeapons()
+{
 	for (auto Weapon : UserWeaponList)
 	{
 		WeaponSpawn = (UClass*)Weapon->GeneratedClass;
 
 		CodeWeaponList.Add(GetWorld()->SpawnActor<AWeaponBase>(WeaponSpawn, SpawnInfo));
 		CodeWeaponList.Last()->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
-		//CodeWeaponList.Last()->SetActorLocation(Mesh1P->GetSocketLocation("WeaponSocket"));
 		CodeWeaponList.Last()->SetActorHiddenInGame(true);
 	}
 
@@ -69,8 +73,6 @@ void AWeaponProjectCharacter::BeginPlay()
 		CodeWeaponList[0]->SetActorHiddenInGame(false);
 		CurrentWeapon = CodeWeaponList[0];
 	}
-
-	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -134,30 +136,36 @@ void AWeaponProjectCharacter::LookUpAtRate(float Rate)
 
 void AWeaponProjectCharacter::ChangeWeaponUp()
 {
-	CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(true);
-
-	WeaponIndex++;
-	if (WeaponIndex > CodeWeaponList.Num() - 1)
+	if (CodeWeaponList.Num() > 0)
 	{
-		WeaponIndex = 0;
-	}
-	CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
+		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(true);
 
-	CurrentWeapon = CodeWeaponList[WeaponIndex];
+		WeaponIndex++;
+		if (WeaponIndex > CodeWeaponList.Num() - 1)
+		{
+			WeaponIndex = 0;
+		}
+		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
+
+		CurrentWeapon = CodeWeaponList[WeaponIndex];
+	}
 }
 
 void AWeaponProjectCharacter::ChangeWeaponDown()
 {
-	CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(true);
-
-	WeaponIndex--;
-	if (WeaponIndex < 0)
+	if (CodeWeaponList.Num() > 0)
 	{
-		WeaponIndex = CodeWeaponList.Num() - 1;
-	}
-	CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
+		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(true);
 
-	CurrentWeapon = CodeWeaponList[WeaponIndex];
+		WeaponIndex--;
+		if (WeaponIndex < 0)
+		{
+			WeaponIndex = CodeWeaponList.Num() - 1;
+		}
+		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
+
+		CurrentWeapon = CodeWeaponList[WeaponIndex];
+	}
 }
 
 void AWeaponProjectCharacter::CharacterFire()
