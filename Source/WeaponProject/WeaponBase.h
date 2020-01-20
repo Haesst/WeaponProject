@@ -100,4 +100,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
+	void SetWeaponComponents();
+	bool WeaponCanFire();
+	void PlayFireEffects();
+	FVector GetBulletSpawnLocation();
+	FActorSpawnParameters GetBulletSpawnParameters();
+	void GetBulletSpawnRotation();
+	void SpawnBullet(FVector SpawnLocation, FActorSpawnParameters ActorSpawnParams);
 };
