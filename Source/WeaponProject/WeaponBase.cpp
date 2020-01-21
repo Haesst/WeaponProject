@@ -34,6 +34,7 @@ AWeaponBase::AWeaponBase()
 
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
+	SetWeaponComponents();
 }
 
 // Called when the game starts or when spawned
@@ -41,8 +42,9 @@ void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetWeaponComponents();
 	TimerDel.BindUFunction(this, FName("OnResetSpread"));
+	
+	MagazineClass->CurrentMagazineSize = MagazineClass->MaxMagazineSize;
 	
 }
 
@@ -55,16 +57,18 @@ void AWeaponBase::Tick(float DeltaTime)
 
 void AWeaponBase::SetWeaponComponents()
 {
-	RecoilClass = FindComponentByClass<URecoilComponent>();
-	MagazineClass = FindComponentByClass<UMagazineComponent>();
-	MuzzleClass = FindComponentByClass<UMuzzleComponent>();
+	RecoilClass = CreateDefaultSubobject<URecoilComponent>(TEXT("RecoilComponent"));
+	MagazineClass = CreateDefaultSubobject<UMagazineComponent>(TEXT("MagazineComponent"));
+	MuzzleClass = CreateDefaultSubobject<UMuzzleComponent>(TEXT("MuzzleComponent"));
+
+	RecoilClass->bEditableWhenInherited = true;
+	MagazineClass->bEditableWhenInherited = true;
+	MuzzleClass->bEditableWhenInherited = true;
 
 	if (MuzzleClass)
 	{
 		MuzzleClass->SetMuzzleLocation(FP_MuzzleLocation);
 	}
-
-	MagazineClass->CurrentMagazineSize = MagazineClass->MaxMagazineSize;
 }
 
 bool AWeaponBase::WeaponCanFire()
