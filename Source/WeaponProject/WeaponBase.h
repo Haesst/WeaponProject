@@ -60,12 +60,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Shooting")
 	void OnFire();
 
+	void BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation);
+
+	void FireBullet(FActorSpawnParameters SpawnParameters, FVector SpawnLocation);
+	void FireRepeatingBullet();
+
+	void FullAutoFire();
+
 	UFUNCTION()
 	void OnResetSpread();
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 	FTimerDelegate TimerDel;
 	FTimerHandle TimerHandle;
+
+	FTimerDelegate BurstTimerDel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float TimeToReset = 10.f;
@@ -75,6 +84,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Stats")
 	float fireRate;
 
+	FTimerHandle BurstTimerHandle;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
+	int NumOfBurstShots = 3;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
+	float BurstInterval = .1f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Stats")
 	float spread;
@@ -84,6 +99,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Magazine")
 	class UMagazineComponent* MagazineClass;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Weapon Select Fire")
+	class USelectiveFireComponent* SelectiveFireClass;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Magazine")
 	class UMuzzleComponent* MuzzleClass;
@@ -107,6 +125,6 @@ private:
 	void PlayFireEffects();
 	FVector GetBulletSpawnLocation();
 	FActorSpawnParameters GetBulletSpawnParameters();
-	void GetBulletSpawnRotation();
+	void SetBulletSpawnRotation();
 	void SpawnBullet(FVector SpawnLocation, FActorSpawnParameters ActorSpawnParams);
 };

@@ -10,6 +10,7 @@
 #include "Engine/World.h"
 #include <Components/SceneComponent.h>
 #include "WeaponComponents/RecoilComponent.h"
+#include "WeaponComponents/SelectiveFireComponent.h"
 #include "WeaponComponents/MagazineComponent.h"
 #include "WeaponComponents/MuzzleComponent.h"
 #include <TimerManager.h>
@@ -17,7 +18,7 @@
 // Sets default values
 AWeaponBase::AWeaponBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	USceneComponent* rootScene = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
@@ -43,9 +44,11 @@ void AWeaponBase::BeginPlay()
 	Super::BeginPlay();
 
 	TimerDel.BindUFunction(this, FName("OnResetSpread"));
+
 	
+
 	MagazineClass->CurrentMagazineSize = MagazineClass->MaxMagazineSize;
-	
+
 }
 
 // Called every frame
@@ -60,10 +63,12 @@ void AWeaponBase::SetWeaponComponents()
 	RecoilClass = CreateDefaultSubobject<URecoilComponent>(TEXT("RecoilComponent"));
 	MagazineClass = CreateDefaultSubobject<UMagazineComponent>(TEXT("MagazineComponent"));
 	MuzzleClass = CreateDefaultSubobject<UMuzzleComponent>(TEXT("MuzzleComponent"));
+	SelectiveFireClass = CreateDefaultSubobject<USelectiveFireComponent>(TEXT("Selective Fire"));
 
 	RecoilClass->bEditableWhenInherited = true;
 	MagazineClass->bEditableWhenInherited = true;
 	MuzzleClass->bEditableWhenInherited = true;
+	SelectiveFireClass->bEditableWhenInherited = true;
 
 	if (MuzzleClass)
 	{
@@ -101,7 +106,7 @@ FActorSpawnParameters AWeaponBase::GetBulletSpawnParameters()
 	return ActorSpawnParams;
 }
 
-void AWeaponBase::GetBulletSpawnRotation()
+void AWeaponBase::SetBulletSpawnRotation()
 {
 	if (bResetSpreadAccuracy || TimesFired <= MaxShotsUntilSpread)
 	{
@@ -133,7 +138,7 @@ void AWeaponBase::OnFire()
 	// try and fire a projectile
 	if (WeaponCanFire())
 	{
-		GetBulletSpawnRotation();
+		SetBulletSpawnRotation();
 
 		if (TimesFired == 1)
 		{
@@ -146,11 +151,59 @@ void AWeaponBase::OnFire()
 		//Set Spawn Collision Handling Override
 		FActorSpawnParameters ActorSpawnParams = GetBulletSpawnParameters();
 
-		if (GetWorld() != nullptr)
+
+		switch (SelectiveFireClass->SelectiveFireEnum)
 		{
-			SpawnBullet(SpawnLocation, ActorSpawnParams);
+		case ESelectiveFire::SFE_BurstFire:
+
+		    FireBullet(ActorSpawnParams, SpawnLocation);
+			BurstFire(ActorSpawnParams, SpawnLocation);
+
+			break;
+
+		case ESelectiveFire::SFE_FullAuto:
+
+			FireRepeatingBullet();
+
+			break;
+
+		case ESelectiveFire::SFE_SemiAuto:
+
+			break;
 		}
 	}
+}
+
+void AWeaponBase::BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
+{
+	GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, BurstInterval, true, BurstInterval);
+}
+
+void AWeaponBase::FireBullet(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
+{
+	if (GetWorld() != nullptr)
+	{
+		SpawnBullet(SpawnLocation, SpawnParameters);
+	}
+}
+
+void AWeaponBase::FireRepeatingBullet()
+{
+	if (GetWorld() != nullptr)
+	{
+		SetBulletSpawnRotation();
+		SpawnBullet(GetBulletSpawnLocation(), GetBulletSpawnParameters());
+	}
+
+	if (TimesFired >= NumOfBurstShots && SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
+	{
+		GetWorldTimerManager().ClearTimer(BurstTimerHandle);
+		TimesFired = 0;
+	}
+}
+
+void AWeaponBase::FullAutoFire()
+{
 }
 
 void AWeaponBase::OnResetSpread()
