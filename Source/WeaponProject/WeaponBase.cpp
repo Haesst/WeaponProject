@@ -117,11 +117,15 @@ void AWeaponBase::GetBulletSpawnRotation()
 void AWeaponBase::SpawnBullet(FVector SpawnLocation, FActorSpawnParameters ActorSpawnParams)
 {
 	AWeaponProjectProjectile* bullet = GetWorld()->SpawnActor<AWeaponProjectProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-	bullet->Init(0);
-	TimesFired++;
-	MagazineClass->CurrentMagazineSize--;
 
-	PlayFireEffects();
+	if (bullet != nullptr)
+	{
+		bullet->Init(0);
+		TimesFired++;
+		MagazineClass->CurrentMagazineSize--;
+
+		PlayFireEffects();
+	}
 }
 
 void AWeaponBase::OnFire()
