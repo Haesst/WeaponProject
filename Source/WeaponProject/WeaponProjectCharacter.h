@@ -43,11 +43,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon list")
 	TArray<UBlueprint*> UserWeaponList;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon list")
+	AWeaponBase* CurrentWeapon;
+
 	TSubclassOf<class AWeaponBase> WeaponSpawn;
 
 public:
 	TArray <AWeaponBase*> CodeWeaponList;
-	AWeaponBase* CurrentWeapon;
 	FActorSpawnParameters SpawnInfo;
 
 public:

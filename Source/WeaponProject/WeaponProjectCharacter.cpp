@@ -55,6 +55,7 @@ void AWeaponProjectCharacter::BeginPlay()
 	int index = 0;
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
+	CreateWeapons();
 }
 
 void AWeaponProjectCharacter::CreateWeapons()
