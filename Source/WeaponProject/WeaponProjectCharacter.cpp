@@ -36,6 +36,7 @@ AWeaponProjectCharacter::AWeaponProjectCharacter()
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
 	FirstPersonCameraComponent->SetRelativeLocation(FVector(-39.56f, 1.75f, 64.f)); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	DefaultFOV = FirstPersonCameraComponent->FieldOfView;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
@@ -150,6 +151,8 @@ void AWeaponProjectCharacter::ChangeWeaponUp()
 
 		CurrentWeapon = CodeWeaponList[WeaponIndex];
 	}
+
+	ResetFOV();
 }
 
 void AWeaponProjectCharacter::ChangeWeaponDown()
@@ -166,6 +169,16 @@ void AWeaponProjectCharacter::ChangeWeaponDown()
 		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
 
 		CurrentWeapon = CodeWeaponList[WeaponIndex];
+	}
+
+	ResetFOV();
+}
+
+void AWeaponProjectCharacter::ResetFOV()
+{
+	if (GetFirstPersonCameraComponent()->FieldOfView != DefaultFOV)
+	{
+		GetFirstPersonCameraComponent()->FieldOfView = DefaultFOV;
 	}
 }
 

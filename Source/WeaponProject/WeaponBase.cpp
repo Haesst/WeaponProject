@@ -4,6 +4,7 @@
 #include "WeaponBase.h"
 #include "WeaponProjectProjectile.h"
 #include "WeaponProjectCharacter.h"
+#include "GameFramework/Actor.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
@@ -13,6 +14,8 @@
 #include "WeaponComponents/SelectiveFireComponent.h"
 #include "WeaponComponents/MagazineComponent.h"
 #include "WeaponComponents/MuzzleComponent.h"
+#include "WeaponComponents/AlternativeFireComponent.h"
+#include "Camera/CameraComponent.h"
 #include <TimerManager.h>
 
 // Sets default values
@@ -35,6 +38,7 @@ AWeaponBase::AWeaponBase()
 
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
+
 	SetWeaponComponents();
 }
 
@@ -64,15 +68,30 @@ void AWeaponBase::SetWeaponComponents()
 	MagazineClass = CreateDefaultSubobject<UMagazineComponent>(TEXT("MagazineComponent"));
 	MuzzleClass = CreateDefaultSubobject<UMuzzleComponent>(TEXT("MuzzleComponent"));
 	SelectiveFireClass = CreateDefaultSubobject<USelectiveFireComponent>(TEXT("Selective Fire"));
+	AlternativeFireClass = CreateDefaultSubobject<UAlternativeFireComponent>(TEXT("Alternative Fire"));
 
 	RecoilClass->bEditableWhenInherited = true;
 	MagazineClass->bEditableWhenInherited = true;
 	MuzzleClass->bEditableWhenInherited = true;
 	SelectiveFireClass->bEditableWhenInherited = true;
+	AlternativeFireClass->bEditableWhenInherited = true;
 
 	if (MuzzleClass)
 	{
 		MuzzleClass->SetMuzzleLocation(FP_MuzzleLocation);
+	}
+}
+
+void AWeaponBase::OnConstruction(const FTransform& Transform)
+{
+	if (WeaponOwner == nullptr)
+	{
+		WeaponOwner = GetOwner();
+	}
+
+	if (WeaponOwner->IsA<AWeaponProjectCharacter>())
+	{
+		AlternativeFireClass->Init(SelectiveFireClass, Cast<AWeaponProjectCharacter>(WeaponOwner)->GetFirstPersonCameraComponent());
 	}
 }
 
@@ -225,4 +244,9 @@ void AWeaponBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	GetWorld()->GetTimerManager().ClearTimer(SpreadResetHandle);
+}
+
+void AWeaponBase::OnAlternativeFire()
+{
+	AlternativeFireClass->TriggerAlternativeFire();
 }

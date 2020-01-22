@@ -34,6 +34,7 @@ public:
 	AWeaponBase();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void OnConstruction(const FTransform& Transform);
 
 	/* Rotation given to bullet being spawned */
 	FRotator SpawnRotation;
@@ -43,6 +44,9 @@ public:
 	/** Gun muzzle's offset from the characters location */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	FVector GunOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Owner")
+	class AActor* WeaponOwner;
 
 	/** Sound to play each time we fire */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
@@ -59,6 +63,9 @@ public:
 	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = "Shooting")
 	void OnFire();
+	
+	UFUNCTION(BlueprintCallable, Category = "Alternative Fire")
+	void OnAlternativeFire();
 
 	void BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation);
 
@@ -105,6 +112,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Magazine")
 	class UMuzzleComponent* MuzzleClass;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Magazine")
+	class UAlternativeFireComponent* AlternativeFireClass;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Recoil")
 	bool bResetSpreadAccuracy = false;
