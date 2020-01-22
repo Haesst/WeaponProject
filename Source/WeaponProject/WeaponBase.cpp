@@ -156,7 +156,7 @@ void AWeaponBase::OnFire()
 		{
 		case ESelectiveFire::SFE_BurstFire:
 
-		    FireBullet(ActorSpawnParams, SpawnLocation);
+
 			BurstFire(ActorSpawnParams, SpawnLocation);
 
 			break;
@@ -169,6 +169,8 @@ void AWeaponBase::OnFire()
 
 		case ESelectiveFire::SFE_SemiAuto:
 
+			FireBullet(ActorSpawnParams, SpawnLocation);
+
 			break;
 		}
 	}
@@ -176,7 +178,10 @@ void AWeaponBase::OnFire()
 
 void AWeaponBase::BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
 {
-	GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, BurstInterval, true, BurstInterval);
+	if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
+	{
+		GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, BurstInterval, true, BurstInterval);
+	}
 }
 
 void AWeaponBase::FireBullet(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
@@ -195,7 +200,7 @@ void AWeaponBase::FireRepeatingBullet()
 		SpawnBullet(GetBulletSpawnLocation(), GetBulletSpawnParameters());
 	}
 
-	if (TimesFired >= NumOfBurstShots && SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
+	if (TimesFired >= NumOfBurstShots && SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire) //REFACTOR BEFORE TURN IN PLS
 	{
 		GetWorldTimerManager().ClearTimer(BurstTimerHandle);
 		TimesFired = 0;
