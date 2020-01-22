@@ -46,6 +46,12 @@ AWeaponProjectCharacter::AWeaponProjectCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
+
+	//Create a trigger capsule
+	TriggerCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Trigger Capsule"));
+	TriggerCapsule->InitCapsuleSize(55.f, 96.f);
+	TriggerCapsule->SetCollisionProfileName(TEXT("Trigger"));
+	TriggerCapsule->SetupAttachment(RootComponent);
 }
 
 void AWeaponProjectCharacter::BeginPlay()
@@ -57,7 +63,31 @@ void AWeaponProjectCharacter::BeginPlay()
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	CreateWeapons();
+
+	//Declare overlap events
+	TriggerCapsule->OnComponentBeginOverlap.AddDynamic(this, &AWeaponProjectCharacter::OnOverlapBegin);
+	TriggerCapsule->OnComponentEndOverlap.AddDynamic(this, &AWeaponProjectCharacter::OnOverlapEnd);
 }
+
+void AWeaponProjectCharacter::OnOverlapBegin(UPrimitiveComponent* OverlapComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp && SweepResult.GetComponent()->GetName() == "BoxCollider")
+	{
+		bIsOverlaping = true;
+		WeaponActor = Cast<AWeaponBase>(OtherActor);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, (TEXT("%s"), SweepResult.GetComponent()->GetName()));
+	}
+}
+
+void AWeaponProjectCharacter::OnOverlapEnd(UPrimitiveComponent* OverlapComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		bIsOverlaping = false;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("End Overlap"));
+	}
+}
+
 
 void AWeaponProjectCharacter::CreateWeapons()
 {
@@ -90,6 +120,7 @@ void AWeaponProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 	PlayerInputComponent->BindAction("WeaponSwitchUp", IE_Pressed, this, &AWeaponProjectCharacter::ChangeWeaponUp);
 	PlayerInputComponent->BindAction("WeaponSwitchDown", IE_Pressed, this, &AWeaponProjectCharacter::ChangeWeaponDown);
+	PlayerInputComponent->BindAction("PickUpWeapon", IE_Pressed, this, &AWeaponProjectCharacter::PickUpWeapon);
 	// Bind fire event
 	//PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ACPPWeaponProjectCharacter::CharacterFire);
 
@@ -198,4 +229,18 @@ void AWeaponProjectCharacter::CharacterReload()
 	}
 }
 
+void AWeaponProjectCharacter::PickUpWeapon()
+{
+	if (bIsOverlaping)
+	{
+		WeaponActor->OnInteract();
+	}
+}
 
+void AWeaponProjectCharacter::AddToInventory(AWeaponBase* weapon)
+{
+	CodeWeaponList.Add(weapon);
+	CodeWeaponList.Last()->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+	CodeWeaponList.Last()->SetActorHiddenInGame(true);
+	ChangeWeaponUp();
+}

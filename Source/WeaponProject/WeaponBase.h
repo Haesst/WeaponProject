@@ -27,6 +27,9 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	class USceneComponent* FP_MuzzleLocation;
 
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	class UBoxComponent* BoxCollider;
+
 	FTimerHandle SpreadResetHandle; //For spread reset timer
 
 public:	
@@ -67,10 +70,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Alternative Fire")
 	void OnAlternativeFire();
 
+	UFUNCTION()
+	virtual void OnOverlapBegin(class UPrimitiveComponent* OverlapComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnOverlapEnd(class UPrimitiveComponent* OverlapComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	void BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation);
 
 	void FireBullet(FActorSpawnParameters SpawnParameters, FVector SpawnLocation);
 	void FireRepeatingBullet();
+	virtual void OnInteract();
 
 	void FullAutoFire();
 
@@ -124,6 +134,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Recoil")
 	int TimesFired = 0;
+
+	bool bIsOverlaping = false;
 
 protected:
 	// Called when the game starts or when spawned

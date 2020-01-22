@@ -18,6 +18,10 @@ class AWeaponProjectCharacter : public ACharacter
 private:
 	float DefaultFOV = 0.0f;
 
+	UPROPERTY(VisibleAnywhere, Category = "Trigger Capsule")
+	class UCapsuleComponent* TriggerCapsule;
+protected:
+	bool bIsOverlaping;
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -49,6 +53,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon list")
 	AWeaponBase* CurrentWeapon;
 
+	AWeaponBase* WeaponActor;
+
 	TSubclassOf<class AWeaponBase> WeaponSpawn;
 
 public:
@@ -56,6 +62,13 @@ public:
 	FActorSpawnParameters SpawnInfo;
 
 public:
+
+	UFUNCTION()
+	virtual void OnOverlapBegin(class UPrimitiveComponent* OverlapComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnOverlapEnd(class UPrimitiveComponent* OverlapComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 	UFUNCTION(BlueprintCallable)
 	void CharacterFire();
 
@@ -71,6 +84,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 	AWeaponProjectCharacter();
+	void AddToInventory(AWeaponBase* weapon);
 
 protected:
 	/** Handles moving forward/backward */
@@ -93,10 +107,10 @@ protected:
 
 	void ChangeWeaponUp();
 	void ChangeWeaponDown();
+	void PickUpWeapon();
 	virtual void BeginPlay();
 
 private:
 	void CreateWeapons();
 	void ResetFOV();
 };
-

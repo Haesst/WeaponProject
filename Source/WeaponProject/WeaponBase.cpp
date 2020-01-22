@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
 #include <Components/SceneComponent.h>
@@ -35,6 +36,13 @@ AWeaponBase::AWeaponBase()
 	FP_MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	FP_MuzzleLocation->SetRelativeLocation(FVector(0.2f, 48.4f, -10.6f));
 	FP_MuzzleLocation->SetupAttachment(FP_Gun);
+
+	BoxCollider = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollider"));
+	BoxCollider->SetupAttachment(FP_Gun);
+	BoxCollider->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	BoxCollider->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
+	BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &AWeaponBase::OnOverlapBegin);
+	BoxCollider->OnComponentEndOverlap.AddDynamic(this, &AWeaponBase::OnOverlapEnd);
 
 	// Default offset from the character location for projectiles to spawn
 	GunOffset = FVector(100.0f, 0.0f, 10.0f);
@@ -89,9 +97,12 @@ void AWeaponBase::OnConstruction(const FTransform& Transform)
 		WeaponOwner = GetOwner();
 	}
 
-	if (WeaponOwner->IsA<AWeaponProjectCharacter>())
+	if (WeaponOwner)
 	{
-		AlternativeFireClass->Init(SelectiveFireClass, Cast<AWeaponProjectCharacter>(WeaponOwner)->GetFirstPersonCameraComponent());
+		if (WeaponOwner->IsA<AWeaponProjectCharacter>())
+		{
+			AlternativeFireClass->Init(SelectiveFireClass, Cast<AWeaponProjectCharacter>(WeaponOwner)->GetFirstPersonCameraComponent());
+		}
 	}
 }
 
@@ -249,4 +260,42 @@ void AWeaponBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AWeaponBase::OnAlternativeFire()
 {
 	AlternativeFireClass->TriggerAlternativeFire();
+}
+
+void AWeaponBase::OnOverlapBegin(UPrimitiveComponent* OverlapComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	//check if player we're interacting with
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+
+		bIsOverlaping = true;
+	}
+}
+
+void AWeaponBase::OnOverlapEnd(UPrimitiveComponent* OverlapComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (OtherActor && (OtherActor != this) && OtherComp)
+	{
+		bIsOverlaping = false;
+	}
+}
+
+void AWeaponBase::OnInteract()
+{
+	if (bIsOverlaping)
+	{
+		AWeaponProjectCharacter* Player = Cast<AWeaponProjectCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+
+		if (Player)
+		{
+			Player->AddToInventory(this);
+			BoxCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			WeaponOwner = Player;
+			if (WeaponOwner && WeaponOwner->IsA<AWeaponProjectCharacter>())
+			{
+				AlternativeFireClass->Init(SelectiveFireClass, Cast<AWeaponProjectCharacter>(WeaponOwner)->GetFirstPersonCameraComponent());
+			}
+		}
+	}
 }
