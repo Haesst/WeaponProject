@@ -73,6 +73,9 @@ public:
 	void CharacterFire();
 
 	UFUNCTION(BlueprintCallable)
+	void CharacterStopFire();
+
+	UFUNCTION(BlueprintCallable)
 	void CharacterReload();
 
 	UPROPERTY(BlueprintReadWrite)

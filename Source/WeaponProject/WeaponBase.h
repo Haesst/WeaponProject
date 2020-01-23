@@ -63,6 +63,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class AWeaponProjectProjectile> ProjectileClass;
 
+	UPROPERTY(EditAnywhere, Category = "Shooting")
+	bool bCanFire = true;
+
 	/** Fires a projectile. */
 	UFUNCTION(BlueprintCallable, Category = "Shooting")
 	void OnFire();

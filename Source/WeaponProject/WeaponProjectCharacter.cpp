@@ -115,6 +115,10 @@ void AWeaponProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// set up game play key bindings
 	check(PlayerInputComponent);
 
+	/* Full Auto test */
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AWeaponProjectCharacter::CharacterFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AWeaponProjectCharacter::CharacterStopFire);
+
 	// Bind jump events
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
@@ -217,7 +221,16 @@ void AWeaponProjectCharacter::CharacterFire()
 {
 	if (CurrentWeapon)
 	{
+		CurrentWeapon->bCanFire = true;
 		CurrentWeapon->OnFire();
+	}
+}
+
+void AWeaponProjectCharacter::CharacterStopFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->bCanFire = false;
 	}
 }
 
