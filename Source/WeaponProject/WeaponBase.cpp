@@ -238,7 +238,9 @@ void AWeaponBase::FireRepeatingBullet()
 }
 
 void AWeaponBase::FullAutoFire()
+void AWeaponBase::FullAutoFire(bool bFireTriggerIsPressed)
 {
+
 }
 
 void AWeaponBase::OnResetSpread()

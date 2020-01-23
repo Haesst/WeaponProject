@@ -83,6 +83,7 @@ public:
 	virtual void OnInteract();
 
 	void FullAutoFire();
+	void FullAutoFire(bool bFireTriggerIsPressed);
 
 	UFUNCTION()
 	void OnResetSpread();
