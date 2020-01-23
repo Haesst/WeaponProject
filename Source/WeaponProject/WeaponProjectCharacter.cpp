@@ -231,6 +231,7 @@ void AWeaponProjectCharacter::CharacterStopFire()
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->bCanFire = false;
+		CurrentWeapon->ResetFullAutoTimer();
 	}
 }
 

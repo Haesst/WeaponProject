@@ -57,17 +57,13 @@ void AWeaponBase::BeginPlay()
 
 	TimerDel.BindUFunction(this, FName("OnResetSpread"));
 
-
-
 	MagazineClass->CurrentMagazineSize = MagazineClass->MaxMagazineSize;
-
 }
 
 // Called every frame
 void AWeaponBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AWeaponBase::SetWeaponComponents()
@@ -216,6 +212,14 @@ void AWeaponBase::BurstFire(FActorSpawnParameters SpawnParameters, FVector Spawn
 	}
 }
 
+void AWeaponBase::FullAutoFire()
+{
+	if (MagazineClass->CurrentMagazineSize >= 0)
+	{
+		GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, BurstInterval, true, BurstInterval);
+	}
+}
+
 void AWeaponBase::FireBullet(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
 {
 	if (GetWorld() != nullptr)
@@ -228,13 +232,11 @@ void AWeaponBase::FireRepeatingBullet()
 {
 	if (GetWorld() != nullptr)
 	{
-		if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_FullAuto)
-		{
+
 			SetBulletSpawnRotation();
 			SpawnBullet(GetBulletSpawnLocation(), GetBulletSpawnParameters());
-
-		}
 	}
+
 
 	if (TimesFired >= NumOfBurstShots && SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire) //REFACTOR BEFORE TURN IN PLS
 	{
@@ -244,10 +246,11 @@ void AWeaponBase::FireRepeatingBullet()
 	}
 }
 
-void AWeaponBase::FullAutoFire()
-void AWeaponBase::FullAutoFire(bool bFireTriggerIsPressed)
-{
 
+
+void AWeaponBase::ResetFullAutoTimer()
+{
+	GetWorldTimerManager().ClearTimer(BurstTimerHandle);
 }
 
 void AWeaponBase::OnResetSpread()
