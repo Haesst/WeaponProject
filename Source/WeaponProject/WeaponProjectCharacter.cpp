@@ -29,7 +29,7 @@ AWeaponProjectCharacter::AWeaponProjectCharacter()
 	BaseLookUpRate = 45.f;
 
 	SpawnInfo.Owner = this;
-	SpawnInfo.Instigator = Instigator;
+	SpawnInfo.Instigator = GetInstigator();
 
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
@@ -122,8 +122,6 @@ void AWeaponProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// Bind jump events
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	PlayerInputComponent->BindAction("WeaponSwitchUp", IE_Pressed, this, &AWeaponProjectCharacter::ChangeWeaponUp);
-	PlayerInputComponent->BindAction("WeaponSwitchDown", IE_Pressed, this, &AWeaponProjectCharacter::ChangeWeaponDown);
 	PlayerInputComponent->BindAction("PickUpWeapon", IE_Pressed, this, &AWeaponProjectCharacter::PickUpWeapon);
 	// Bind fire event
 	//PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ACPPWeaponProjectCharacter::CharacterFire);
@@ -139,6 +137,22 @@ void AWeaponProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	PlayerInputComponent->BindAxis("TurnRate", this, &AWeaponProjectCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AWeaponProjectCharacter::LookUpAtRate);
+
+	// Bind weapon switching to the same function but with different parameters
+	{
+		FInputActionBinding AB("WeaponSwitchUp", IE_Pressed);
+		FInputActionHandlerSignature Delegate;
+		Delegate.BindUObject(this, &AWeaponProjectCharacter::ChangeWeapon, 1);
+		AB.ActionDelegate = Delegate;
+		PlayerInputComponent->AddActionBinding(MoveTemp(AB));
+	}
+	{
+		FInputActionBinding AB("WeaponSwitchDown", IE_Pressed);
+		FInputActionHandlerSignature Delegate;
+		Delegate.BindUObject(this, &AWeaponProjectCharacter::ChangeWeapon, -1);
+		AB.ActionDelegate = Delegate;
+		PlayerInputComponent->AddActionBinding(MoveTemp(AB));
+	}
 }
 
 void AWeaponProjectCharacter::MoveForward(float Value)
@@ -171,42 +185,28 @@ void AWeaponProjectCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AWeaponProjectCharacter::ChangeWeaponUp()
+void AWeaponProjectCharacter::ChangeWeapon(int modifier)
 {
 	if (CodeWeaponList.Num() > 0)
 	{
 		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(true);
 
-		WeaponIndex++;
-		if (WeaponIndex > CodeWeaponList.Num() - 1)
-		{
-			WeaponIndex = 0;
-		}
-		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
+		WeaponIndex += modifier;
 
-		CurrentWeapon = CodeWeaponList[WeaponIndex];
-	}
-
-	ResetFOV();
-}
-
-void AWeaponProjectCharacter::ChangeWeaponDown()
-{
-	if (CodeWeaponList.Num() > 0)
-	{
-		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(true);
-
-		WeaponIndex--;
 		if (WeaponIndex < 0)
 		{
 			WeaponIndex = CodeWeaponList.Num() - 1;
 		}
+		else if (WeaponIndex > CodeWeaponList.Num() - 1)
+		{
+			WeaponIndex = 0;
+		}
+
 		CodeWeaponList[WeaponIndex]->SetActorHiddenInGame(false);
-
 		CurrentWeapon = CodeWeaponList[WeaponIndex];
-	}
 
-	ResetFOV();
+		ResetFOV();
+	}
 }
 
 void AWeaponProjectCharacter::ResetFOV()
@@ -256,5 +256,5 @@ void AWeaponProjectCharacter::AddToInventory(AWeaponBase* weapon)
 	CodeWeaponList.Add(weapon);
 	CodeWeaponList.Last()->AttachToComponent(Mesh1P, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
 	CodeWeaponList.Last()->SetActorHiddenInGame(true);
-	ChangeWeaponUp();
+	ChangeWeapon(1);
 }
