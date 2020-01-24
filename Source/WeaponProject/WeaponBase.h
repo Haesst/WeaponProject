@@ -118,7 +118,7 @@ public:
 	float BurstCooldownTime = 0.5f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
-	float FireRate = .1f;
+	float FireRate = 0.1f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Recoil")
 	class URecoilComponent* RecoilClass;

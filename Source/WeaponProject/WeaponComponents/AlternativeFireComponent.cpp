@@ -14,10 +14,6 @@ UAlternativeFireComponent::UAlternativeFireComponent()
 void UAlternativeFireComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (SelectiveFireComponent)
-	{
-		defaultFireMode = SelectiveFireComponent->SelectiveFireEnum;
-	}
 }
 
 
@@ -72,6 +68,8 @@ void UAlternativeFireComponent::SwitchSight()
 
 void UAlternativeFireComponent::Init(USelectiveFireComponent* InSelectiveFireComponent, UCameraComponent* InMainCamera)
 {
-	this->SelectiveFireComponent = InSelectiveFireComponent;
-	this->MainCamera = InMainCamera;
+	SelectiveFireComponent = InSelectiveFireComponent;
+	MainCamera = InMainCamera;
+
+	defaultFireMode = SelectiveFireComponent->SelectiveFireEnum;
 }
