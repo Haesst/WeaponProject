@@ -22,6 +22,7 @@ private:
 	class UCapsuleComponent* TriggerCapsule;
 protected:
 	bool bIsOverlaping;
+
 public:
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -110,6 +111,8 @@ protected:
 
 	void ChangeWeaponUp();
 	void ChangeWeaponDown();
+	UFUNCTION()
+	void ChangeWeapon(int modifier);
 	void PickUpWeapon();
 	virtual void BeginPlay();
 
