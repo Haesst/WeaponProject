@@ -93,25 +93,25 @@ public:
 	void OnResetSpread();
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
-	FTimerDelegate TimerDel;
-	FTimerHandle TimerHandle;
+	FTimerDelegate RecoilTimerDel;  //RECOIL
+	FTimerHandle RecoilTimerHandle; //RECOIL
 
-	FTimerDelegate BurstTimerDel;
+	FTimerHandle BurstTimerHandle;
+
+	FTimerHandle FullAutoTimerHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float TimeToReset = 10.f;
 
 	void ReloadWeapon();
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Stats")
-	float fireRate;
-
-	FTimerHandle BurstTimerHandle;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
 	int NumOfBurstShots = 3;
+	int CurrentBurstCount = 0;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
-	float BurstInterval = .1f;
+	float FireRate = .1f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Stats")
 	float spread;

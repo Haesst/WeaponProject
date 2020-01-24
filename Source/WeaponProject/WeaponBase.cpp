@@ -55,7 +55,7 @@ void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	TimerDel.BindUFunction(this, FName("OnResetSpread"));
+	RecoilTimerDel.BindUFunction(this, FName("OnResetSpread"));
 
 	MagazineClass->CurrentMagazineSize = MagazineClass->MaxMagazineSize;
 }
@@ -137,7 +137,7 @@ void AWeaponBase::SetBulletSpawnRotation()
 	if (bResetSpreadAccuracy || TimesFired <= MaxShotsUntilSpread)
 	{
 		SpawnRotation = GetActorRotation();
-		GetWorldTimerManager().SetTimer(TimerHandle, TimerDel, TimeToReset, false);
+		GetWorldTimerManager().SetTimer(RecoilTimerHandle, RecoilTimerDel, TimeToReset, false);
 	}
 	else if (TimesFired >= MaxShotsUntilSpread || bResetSpreadAccuracy)
 	{
@@ -145,24 +145,12 @@ void AWeaponBase::SetBulletSpawnRotation()
 	}
 }
 
-void AWeaponBase::SpawnBullet(FVector SpawnLocation, FActorSpawnParameters ActorSpawnParams)
-{
-	AWeaponProjectProjectile* bullet = GetWorld()->SpawnActor<AWeaponProjectProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
 
-	if (bullet != nullptr)
-	{
-		bullet->Init(0);
-		TimesFired++;
-		MagazineClass->CurrentMagazineSize--;
-
-		PlayFireEffects();
-	}
-}
 
 void AWeaponBase::OnFire()
 {
 	// try and fire a projectile
-	if (WeaponCanFire())
+	if (WeaponCanFire() && MagazineClass->CurrentMagazineSize > 0)
 	{
 		SetBulletSpawnRotation();
 
@@ -202,11 +190,17 @@ void AWeaponBase::OnFire()
 
 void AWeaponBase::BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
 {
-	if (TimesFired <= 3)
+	/*for (int BulletsToBeFired = 0; BulletsToBeFired < NumOfBurstShots; BulletsToBeFired++)
+	{
+		SpawnBullet(SpawnLocation, SpawnParameters);
+	}*/
+	CurrentBurstCount++;
+
+	if (CurrentBurstCount <= NumOfBurstShots && bCanFire)
 	{
 		if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
 		{
-			GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, BurstInterval, true, BurstInterval);
+			GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, FireRate, true, 0.0f);
 			bCanFire = false;
 		}
 	}
@@ -216,7 +210,7 @@ void AWeaponBase::FullAutoFire()
 {
 	if (MagazineClass->CurrentMagazineSize >= 0)
 	{
-		GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &AWeaponBase::FireRepeatingBullet, BurstInterval, true, BurstInterval);
+		GetWorldTimerManager().SetTimer(FullAutoTimerHandle, this, &AWeaponBase::FireRepeatingBullet, FireRate, true, 0.0f);
 	}
 }
 
@@ -230,19 +224,40 @@ void AWeaponBase::FireBullet(FActorSpawnParameters SpawnParameters, FVector Spaw
 
 void AWeaponBase::FireRepeatingBullet()
 {
-	if (GetWorld() != nullptr)
+	if (MagazineClass->CurrentMagazineSize > 0)
 	{
-
+		if (GetWorld() != nullptr)
+		{
 			SetBulletSpawnRotation();
 			SpawnBullet(GetBulletSpawnLocation(), GetBulletSpawnParameters());
+		}
+	}
+
+	else
+	{
+		GetWorldTimerManager().ClearTimer(BurstTimerHandle);
 	}
 
 
-	if (TimesFired >= NumOfBurstShots && SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire) //REFACTOR BEFORE TURN IN PLS
+	if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire && CurrentBurstCount >= NumOfBurstShots) //REFACTOR BEFORE TURN IN PLS
 	{
 		GetWorldTimerManager().ClearTimer(BurstTimerHandle);
-		TimesFired = 0;
+		CurrentBurstCount = 0;
 		bCanFire = true;
+	}
+}
+
+void AWeaponBase::SpawnBullet(FVector SpawnLocation, FActorSpawnParameters ActorSpawnParams)
+{
+	AWeaponProjectProjectile* bullet = GetWorld()->SpawnActor<AWeaponProjectProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+
+	if (bullet != nullptr)
+	{
+		bullet->Init(0);
+		TimesFired++;
+		MagazineClass->CurrentMagazineSize--;
+
+		PlayFireEffects();
 	}
 }
 
@@ -250,7 +265,7 @@ void AWeaponBase::FireRepeatingBullet()
 
 void AWeaponBase::ResetFullAutoTimer()
 {
-	GetWorldTimerManager().ClearTimer(BurstTimerHandle);
+	GetWorldTimerManager().ClearTimer(FullAutoTimerHandle);
 }
 
 void AWeaponBase::OnResetSpread()
