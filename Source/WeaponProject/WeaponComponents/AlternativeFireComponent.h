@@ -29,6 +29,7 @@ private:
 	int CurrentCamera = 0;
 	bool Aiming = false;
 	float DefaultFOV = 0.0f;
+	ESelectiveFire defaultFireMode;
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Alternative Fire Enum")

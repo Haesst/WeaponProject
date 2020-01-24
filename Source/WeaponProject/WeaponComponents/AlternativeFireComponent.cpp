@@ -14,6 +14,10 @@ UAlternativeFireComponent::UAlternativeFireComponent()
 void UAlternativeFireComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	if (SelectiveFireComponent)
+	{
+		defaultFireMode = SelectiveFireComponent->SelectiveFireEnum;
+	}
 }
 
 
@@ -42,7 +46,7 @@ void UAlternativeFireComponent::SwitchBurst()
 {
 	if (SelectiveFireComponent->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
 	{
-		SelectiveFireComponent->SelectiveFireEnum = ESelectiveFire::SFE_SemiAuto;
+		SelectiveFireComponent->SelectiveFireEnum = defaultFireMode;
 	}
 	else
 	{

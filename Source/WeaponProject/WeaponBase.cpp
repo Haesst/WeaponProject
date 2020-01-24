@@ -12,7 +12,6 @@
 #include "Engine/World.h"
 #include <Components/SceneComponent.h>
 #include "WeaponComponents/RecoilComponent.h"
-#include "WeaponComponents/SelectiveFireComponent.h"
 #include "WeaponComponents/MagazineComponent.h"
 #include "WeaponComponents/MuzzleComponent.h"
 #include "WeaponComponents/AlternativeFireComponent.h"
@@ -68,11 +67,12 @@ void AWeaponBase::Tick(float DeltaTime)
 
 void AWeaponBase::SetWeaponComponents()
 {
+	/* Create every component for every gun from scratch to avoid crashes */
 	RecoilClass = CreateDefaultSubobject<URecoilComponent>(TEXT("RecoilComponent"));
 	MagazineClass = CreateDefaultSubobject<UMagazineComponent>(TEXT("MagazineComponent"));
 	MuzzleClass = CreateDefaultSubobject<UMuzzleComponent>(TEXT("MuzzleComponent"));
 	SelectiveFireClass = CreateDefaultSubobject<USelectiveFireComponent>(TEXT("Selective Fire"));
-	AlternativeFireClass = CreateDefaultSubobject<UAlternativeFireComponent>(TEXT("Alternative Fire"));
+	AlternativeFireClass = CreateDefaultSubobject<UAlternativeFireComponent>(TEXT("Alternative Fire")); 
 
 	RecoilClass->bEditableWhenInherited = true;
 	MagazineClass->bEditableWhenInherited = true;
@@ -156,7 +156,7 @@ void AWeaponBase::OnFire()
 
 		if (TimesFired == 1)
 		{
-			GetWorld()->GetTimerManager().SetTimer(SpreadResetHandle, this, &AWeaponBase::OnResetSpread, 3.0f, 0.0f);
+			GetWorld()->GetTimerManager().SetTimer(SpreadResetHandle, this, &AWeaponBase::OnResetSpread, 3.0f, 0.0f); //Set recoil reset timer after 1 sec, if player shoots again this will be reset.
 		}
 
 		// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
@@ -190,13 +190,7 @@ void AWeaponBase::OnFire()
 
 void AWeaponBase::BurstFire(FActorSpawnParameters SpawnParameters, FVector SpawnLocation)
 {
-	/*for (int BulletsToBeFired = 0; BulletsToBeFired < NumOfBurstShots; BulletsToBeFired++)
-	{
-		SpawnBullet(SpawnLocation, SpawnParameters);
-	}*/
-	CurrentBurstCount++;
-
-	if (CurrentBurstCount <= NumOfBurstShots && bCanFire)
+	if (CurrentBurstCount < NumOfBurstShots && bCanFire)
 	{
 		if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
 		{
@@ -230,21 +224,37 @@ void AWeaponBase::FireRepeatingBullet()
 		{
 			SetBulletSpawnRotation();
 			SpawnBullet(GetBulletSpawnLocation(), GetBulletSpawnParameters());
+			if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire)
+			{
+				CurrentBurstCount++;
+			}
 		}
 	}
 
 	else
 	{
-		GetWorldTimerManager().ClearTimer(BurstTimerHandle);
+		if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_FullAuto)
+		{
+			GetWorldTimerManager().ClearTimer(FullAutoTimerHandle);
+		}
 	}
 
-
-	if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire && CurrentBurstCount >= NumOfBurstShots) //REFACTOR BEFORE TURN IN PLS
+	if (SelectiveFireClass->SelectiveFireEnum == ESelectiveFire::SFE_BurstFire && CurrentBurstCount >= NumOfBurstShots)
 	{
 		GetWorldTimerManager().ClearTimer(BurstTimerHandle);
-		CurrentBurstCount = 0;
-		bCanFire = true;
+		
+
+		BurstCooldownTimerDelegate.BindUObject(this, &AWeaponBase::ResetBurstFire, true);
+
+		GetWorldTimerManager().SetTimer(BurstCooldownHandle, BurstCooldownTimerDelegate, BurstCooldownTime, false); //Set cooldown timer for burst so you cant spam fire.
 	}
+}
+
+void AWeaponBase::ResetBurstFire(bool CanFire)
+{
+	bCanFire = CanFire;
+	GetWorldTimerManager().ClearTimer(BurstCooldownHandle);
+	CurrentBurstCount = 0;
 }
 
 void AWeaponBase::SpawnBullet(FVector SpawnLocation, FActorSpawnParameters ActorSpawnParams)
@@ -260,8 +270,6 @@ void AWeaponBase::SpawnBullet(FVector SpawnLocation, FActorSpawnParameters Actor
 		PlayFireEffects();
 	}
 }
-
-
 
 void AWeaponBase::ResetFullAutoTimer()
 {

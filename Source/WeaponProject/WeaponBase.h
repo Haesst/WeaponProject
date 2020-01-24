@@ -7,6 +7,7 @@
 #include "Components/InputComponent.h"
 #include "TimerManager.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "WeaponComponents/SelectiveFireComponent.h"
 #include <Engine/EngineTypes.h>
 #include "WeaponBase.generated.h"
 
@@ -93,12 +94,15 @@ public:
 	void OnResetSpread();
 	void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
-	FTimerDelegate RecoilTimerDel;  //RECOIL
-	FTimerHandle RecoilTimerHandle; //RECOIL
+	FTimerDelegate RecoilTimerDel; 
+	FTimerHandle RecoilTimerHandle;
 
 	FTimerHandle BurstTimerHandle;
 
 	FTimerHandle FullAutoTimerHandle;
+
+	FTimerDelegate BurstCooldownTimerDelegate;
+	FTimerHandle BurstCooldownHandle;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	float TimeToReset = 10.f;
@@ -111,10 +115,10 @@ public:
 	int CurrentBurstCount = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
-	float FireRate = .1f;
+	float BurstCooldownTime = 0.5f;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Stats")
-	float spread;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Burst Values")
+	float FireRate = .1f;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Weapon Recoil")
 	class URecoilComponent* RecoilClass;
@@ -150,6 +154,7 @@ private:
 	void SetWeaponComponents();
 	bool WeaponCanFire();
 	void PlayFireEffects();
+	void ResetBurstFire(bool CanFire);
 	FVector GetBulletSpawnLocation();
 	FActorSpawnParameters GetBulletSpawnParameters();
 	void SetBulletSpawnRotation();
