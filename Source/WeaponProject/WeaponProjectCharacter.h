@@ -1,5 +1,11 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
+/** *
+
+
+		This is the Playable Character class that Player controlled characters should derive from.
+
+*/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -79,6 +85,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CharacterReload();
 
+	UFUNCTION(BlueprintCallable)
+	void CharacterAlternativeFire();
+
 	UPROPERTY(BlueprintReadWrite)
 	int WeaponIndex = 0;
 
@@ -108,11 +117,6 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
-
-	void ChangeWeaponUp();
-	void ChangeWeaponDown();
-
-	void ChangeFireMode();
 
 	UFUNCTION()
 	void ChangeWeapon(int modifier);

@@ -23,7 +23,12 @@ class WEAPONPROJECT_API IDummyDamageInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "OnDummyHit")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "OnDummyHit") // Create an event for hit's to call
 	void DummyHit(float InDamage, const FString& HitLocation);
+	/**
+		Implementation of the DummyHit event.
+		@param InDamage - Damage given
+		@param HitLocation - Where the dummy got hit
+	*/
 	virtual void DummyHit_Implementation(float InDamage, const FString& HitLocation) { return; };
 };

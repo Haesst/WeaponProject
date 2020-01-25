@@ -1,5 +1,12 @@
 // Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
 
+/** *
+
+
+		This is a base projectile that every created projectile should derive from as it holds all the projectile functionality.
+
+*/
+
 #pragma once
 
 #include "CoreMinimal.h"

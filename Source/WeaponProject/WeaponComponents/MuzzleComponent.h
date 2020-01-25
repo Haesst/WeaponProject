@@ -1,5 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+/** *
+
+
+		This is a MuzzleComponent for weapons that holds muzzle related things.
+
+*/
 #pragma once
 
 #include "CoreMinimal.h"

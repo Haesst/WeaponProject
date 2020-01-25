@@ -66,6 +66,11 @@ void UAlternativeFireComponent::SwitchSight()
 	}
 }
 
+/**
+	Initialize the AlternativeFireComponent
+	@param InSelectiveFireComponent - The Selective Fire Component on the weapon.
+	@param InMainCamera - The MainCamera on the player the weapon belongs to.
+*/
 void UAlternativeFireComponent::Init(USelectiveFireComponent* InSelectiveFireComponent, UCameraComponent* InMainCamera)
 {
 	SelectiveFireComponent = InSelectiveFireComponent;

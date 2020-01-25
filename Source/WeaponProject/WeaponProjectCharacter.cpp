@@ -88,7 +88,9 @@ void AWeaponProjectCharacter::OnOverlapEnd(UPrimitiveComponent* OverlapComp, AAc
 	}
 }
 
-
+/**
+	Create any weapons that the character should spawn with defined in blueprint.
+ */
 void AWeaponProjectCharacter::CreateWeapons()
 {
 	for (auto Weapon : UserWeaponList)
@@ -118,6 +120,7 @@ void AWeaponProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AWeaponProjectCharacter::CharacterFire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AWeaponProjectCharacter::CharacterStopFire);
+	PlayerInputComponent->BindAction("AlternativeFire", IE_Pressed, this, &AWeaponProjectCharacter::CharacterAlternativeFire);
 
 	// Bind jump events
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -185,11 +188,6 @@ void AWeaponProjectCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AWeaponProjectCharacter::ChangeFireMode()
-{
-	CurrentWeapon->OnAlternativeFire();
-}
-
 void AWeaponProjectCharacter::ChangeWeapon(int modifier)
 {
 	if (CodeWeaponList.Num() > 0)
@@ -214,6 +212,9 @@ void AWeaponProjectCharacter::ChangeWeapon(int modifier)
 	}
 }
 
+/**
+	Reset the FOV on the camera so the zoom defaults back to it's original zoom.
+*/
 void AWeaponProjectCharacter::ResetFOV()
 {
 	if (GetFirstPersonCameraComponent()->FieldOfView != DefaultFOV)
@@ -253,6 +254,14 @@ void AWeaponProjectCharacter::PickUpWeapon()
 	if (bIsOverlaping)
 	{
 		WeaponActor->OnInteract();
+	}
+}
+
+void AWeaponProjectCharacter::CharacterAlternativeFire()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->OnAlternativeFire();
 	}
 }
 

@@ -1,5 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+/** *
+
+
+		This is a AlternativeFireComponent for weapons that sets a weapons alternative fire.
+
+*/
 #pragma once
 
 #include "CoreMinimal.h"
@@ -9,6 +15,13 @@
 #include "AlternativeFireComponent.generated.h"
 
 
+
+/** *
+
+
+		Enum for the different kinds of alternative fires in the game
+
+*/
 UENUM(BlueprintType)
 enum class EAlternativeFire : uint8
 {

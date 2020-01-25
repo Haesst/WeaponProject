@@ -38,6 +38,7 @@ void AWeaponProjectProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* Other
 	// Only add impulse and destroy projectile if we hit a physics
 	if (CheckForCollisionPhysics(OtherActor, OtherComp))
 	{
+		// Try to apply test dummy damage if the hit actor implements it
 		ApplyTestDummyDamage(OtherActor, Hit);
 
 		if (OtherComp->IsSimulatingPhysics())
@@ -65,6 +66,9 @@ bool AWeaponProjectProjectile::CheckForCollisionPhysics(AActor* OtherActor, UPri
 	return (OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr);
 }
 
+/**
+	Try to execute a dummy hit if the hit target is a test dummy.
+*/
 void AWeaponProjectProjectile::ApplyTestDummyDamage(AActor* OtherActor, const FHitResult& Hit)
 {
 	IDummyDamageInterface* TestDummyHit = Cast<IDummyDamageInterface>(OtherActor);
