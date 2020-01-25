@@ -1,0 +1,6 @@
+The controls for testing this weapon system:
+
+To fire, press the left mouse button.
+To change fire mode (Selective Fire Component) use the right mouse button.
+
+All components are fully customizable inside the weapons blueprint.

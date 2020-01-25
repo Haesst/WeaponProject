@@ -250,7 +250,7 @@ void AWeaponBase::FireRepeatingBullet()
 	}
 }
 
-void AWeaponBase::ResetBurstFire(bool CanFire)
+void AWeaponBase::ResetBurstFire(bool CanFire) //Clear the Burst cooldown timer.
 {
 	bCanFire = CanFire;
 	GetWorldTimerManager().ClearTimer(BurstCooldownHandle);

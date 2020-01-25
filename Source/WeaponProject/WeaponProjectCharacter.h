@@ -111,6 +111,9 @@ protected:
 
 	void ChangeWeaponUp();
 	void ChangeWeaponDown();
+
+	void ChangeFireMode();
+
 	UFUNCTION()
 	void ChangeWeapon(int modifier);
 	void PickUpWeapon();

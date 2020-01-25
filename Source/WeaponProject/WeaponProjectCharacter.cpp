@@ -115,7 +115,7 @@ void AWeaponProjectCharacter::SetupPlayerInputComponent(class UInputComponent* P
 	// set up game play key bindings
 	check(PlayerInputComponent);
 
-	/* Full Auto test */
+
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AWeaponProjectCharacter::CharacterFire);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AWeaponProjectCharacter::CharacterStopFire);
 
@@ -183,6 +183,11 @@ void AWeaponProjectCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AWeaponProjectCharacter::ChangeFireMode()
+{
+	CurrentWeapon->OnAlternativeFire();
 }
 
 void AWeaponProjectCharacter::ChangeWeapon(int modifier)
