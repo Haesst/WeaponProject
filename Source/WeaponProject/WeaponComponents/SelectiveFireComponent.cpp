@@ -1,5 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
+/** 
+		
+		This class adds an enum which can be set in blueprint, this enum decides the weapons fire mode (Burst, semi, Full auto)
+	
+*/
 
 #include "SelectiveFireComponent.h"
 

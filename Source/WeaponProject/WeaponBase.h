@@ -1,5 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+/** *
+
+		
+		This is a base weapon that every created weapon should derive from as it holds all the weapon functionality.
+
+*/
+
+
+
+
 #pragma once
 
 #include "CoreMinimal.h"

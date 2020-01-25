@@ -1,5 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+/** 
 
+	This class adds a spread to the bullet implemented in AWeaponBase.cpp
+
+*/
 
 #include "RecoilComponent.h"
 
